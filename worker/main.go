@@ -4,8 +4,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -28,7 +32,43 @@ type Task struct {
 
 // Download data from the specified URL.
 // The downloaded data is stored inside of the OUTPUT_DIR directory.
-func Downloader(url string) error {
+func Downloader(fullURLFile string) error {
+	fileURL, err := url.Parse(fullURLFile)
+	if err != nil {
+		log.Printf("error while downloading file: %s\n", err)
+		return err
+	}
+
+	filePath := fileURL.Path
+	segments := strings.Split(filePath, "/")
+	var fileName = segments[len(segments)-1]
+
+	file, err := os.Create(fmt.Sprintf("./%s/%s", OUTPUT_DIR, fileName))
+	if err != nil {
+		log.Printf("error while downloading file: %s\n", err)
+		return err
+	}
+
+	client := http.Client{
+		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+			r.URL.Opaque = r.URL.Path
+			return nil
+		},
+	}
+
+	resp, err := client.Get(fullURLFile)
+	if err != nil {
+		log.Printf("error while downloading file: %s\n", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	size, err := io.Copy(file, resp.Body)
+
+	defer file.Close()
+
+	log.Printf("[Downloader]  downloaded file %s with size %d", fileName, size)
+
 	return nil
 }
 
@@ -88,6 +128,8 @@ func main() {
 				log.Printf("[%s] failed to decode message to task: %s\n", WORKER_NAME, err)
 			} else {
 				log.Printf("[%s] received task `%s` of type `%s` with args `%s`\n", WORKER_NAME, task.Name, task.TaskType, task.Arg)
+
+				Downloader(task.Arg)
 			}
 		}
 	}()
