@@ -25,5 +25,7 @@ worker
 # Go workspace file
 go.work
 
+**/*_output/
+
 # End of https://www.toptal.com/developers/gitignore/api/go
 
