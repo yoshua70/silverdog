@@ -13,9 +13,14 @@ import (
 
 const DEFAULT_PORT int = 3333
 const DEFAULT_RABBITMQ_URL string = "amqp://guest:guest@localhost:5672/"
+const TASK_QUEUE_NAME string = "tasks"
 
 var PORT int
 var RABBITMQ_URL string
+
+// var taskQueue amqp.Queue
+// var rabbitmqChannel *amqp.Channel
+// var channelContext context.Context
 
 type Task struct {
 	Name     string `json:"name"`
@@ -42,11 +47,22 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 func HandleTask(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		_, err := HandleTaskPostRequest(r.Body)
+		task, err := HandleTaskPostRequest(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		body, err := json.Marshal(task)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		SendMessageToQeue(TASK_QUEUE_NAME, body)
+
+		log.Printf("POST /task sent message\n")
+
 		io.WriteString(w, "ok")
 	}
 }
@@ -94,7 +110,7 @@ func main() {
 	http.HandleFunc("/", HandleRoot)
 	http.HandleFunc("/task", HandleTask)
 
-	err := http.ListenAndServe(":3333", nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), nil)
 
 	if errors.Is(err, http.ErrServerClosed) {
 		log.Println("server closed")
