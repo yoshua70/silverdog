@@ -1,13 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 )
 
+type Task struct {
+	Name     string `json:"name"`
+	TaskType string `json:"taskType"`
+	Arg      string `json:"arg"`
+}
 
 func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -25,8 +32,51 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "ok")
 }
 
+func HandleTask(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		_, err := HandleTaskPostRequest(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		io.WriteString(w, "ok")
+	}
+}
+
+func HandleTaskPostRequest(body io.ReadCloser) (Task, error) {
+	var task Task
+	err := json.NewDecoder(body).Decode(&task)
+
+	if err != nil {
+		return task, errors.New(err.Error())
+	}
+
+	err = CheckTaskObject(task)
+
+	if err != nil {
+		return task, errors.New(err.Error())
+	}
+
+	log.Printf("POST /task %v\n", task)
+
+	return task, nil
+}
+
+func HandleTaskGetRequest(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func CheckTaskObject(task Task) error {
+	if !(len(task.Name) > 0) || !(len(task.TaskType) > 0) || !(len(task.Arg) > 0) {
+		return errors.New("some fields are missing. Please ensure that your request body contains the following fields: `name`, `taskType`, `arg`")
+	}
+	return nil
+}
+
 func main() {
 	http.HandleFunc("/", HandleRoot)
+	http.HandleFunc("/task", HandleTask)
 
 	err := http.ListenAndServe(":3333", nil)
 
