@@ -1,11 +1,7 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-*/
 package main
 
-import "silverdog/cmd"
+import "fmt"
 
 func main() {
-	cmd.Execute()
+	fmt.Println("Hello, World!")
 }
