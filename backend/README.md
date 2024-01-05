@@ -4,12 +4,12 @@
 
 Build the project into an executable:
 ```sh
-go build -o taskqueue *.go 
+go build -o tasker *.go 
 ```
 
 Launch the http server:
 ```sh
-./taskqueue
+./tasker
 ```
 
 You can now make requests to the server.
