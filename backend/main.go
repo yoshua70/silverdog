@@ -18,10 +18,6 @@ const TASK_QUEUE_NAME string = "tasks"
 var PORT int
 var RABBITMQ_URL string
 
-// var taskQueue amqp.Queue
-// var rabbitmqChannel *amqp.Channel
-// var channelContext context.Context
-
 type Task struct {
 	Name     string `json:"name"`
 	TaskType string `json:"taskType"`
@@ -64,6 +60,10 @@ func HandleTask(w http.ResponseWriter, r *http.Request) {
 		log.Printf("POST /task sent message\n")
 
 		io.WriteString(w, "ok")
+	default:
+		log.Printf("%s / unsupported method\n", r.Method)
+		io.WriteString(w, "error")
+		return
 	}
 }
 
