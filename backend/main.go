@@ -3,12 +3,19 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 )
+
+const DEFAULT_PORT int = 3333
+const DEFAULT_RABBITMQ_URL string = "amqp://guest:guest@localhost:5672/"
+
+var PORT int
+var RABBITMQ_URL string
 
 type Task struct {
 	Name     string `json:"name"`
@@ -75,6 +82,15 @@ func CheckTaskObject(task Task) error {
 }
 
 func main() {
+
+	flag.IntVar(&PORT, "port", DEFAULT_PORT, "the listening port for the server")
+	flag.StringVar(&RABBITMQ_URL, "rabbitmq", DEFAULT_RABBITMQ_URL, "the connection url to RabbitMQ")
+
+	flag.Parse()
+
+	log.Printf("argument `port` set to %d\n", PORT)
+	log.Printf("argument `rabbitmq` set to %s\n", RABBITMQ_URL)
+
 	http.HandleFunc("/", HandleRoot)
 	http.HandleFunc("/task", HandleTask)
 
