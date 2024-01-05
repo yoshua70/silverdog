@@ -43,8 +43,9 @@ func SendMessageToQeue(queueName string, body []byte) {
 		false,  // mandatory
 		false,  // immediate
 		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        body,
+			DeliveryMode: amqp.Persistent,
+			ContentType:  "text/plain",
+			Body:         body,
 		})
 
 	// TODO: return the error instead of panicking.
