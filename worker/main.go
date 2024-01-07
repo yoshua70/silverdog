@@ -30,6 +30,12 @@ type Task struct {
 	Arg      string `json:"arg"`
 }
 
+type Notification struct {
+	Status string `json:"status"`
+	Body   string `json:"body"`
+	Sent   bool   `json:"sent"`
+}
+
 // Download data from the specified URL.
 // The downloaded data is stored inside of the OUTPUT_DIR directory.
 func Downloader(fullURLFile string) error {
@@ -130,7 +136,25 @@ func main() {
 				log.Printf("[%s] received task `%s` of type `%s` with args `%s`\n", WORKER_NAME, task.Name, task.TaskType, task.Arg)
 
 				// TODO: Check for error and send message to the notification queue.
-				Downloader(task.Arg)
+				err = Downloader(task.Arg)
+
+				notification := Notification{Sent: false}
+
+				if err != nil {
+					notification.Status = "error"
+					notification.Body = err.Error()
+				} else {
+					notification.Status = "ok"
+					notification.Body = ""
+				}
+
+				body, err := json.Marshal(notification)
+				if err != nil {
+					log.Printf("[%s] failed to encode notification into JSON: %s", WORKER_NAME, err)
+					return
+				}
+
+				SendMessageToQeue(NOTIF_QUEUE_NAME, body)
 			}
 		}
 	}()
