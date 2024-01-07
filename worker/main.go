@@ -31,6 +31,7 @@ type Task struct {
 }
 
 type Notification struct {
+	Name   string `json:"name"`
 	Status string `json:"status"`
 	Body   string `json:"body"`
 	Sent   bool   `json:"sent"`
@@ -73,7 +74,7 @@ func Downloader(fullURLFile string) error {
 
 	defer file.Close()
 
-	log.Printf("[Downloader]  downloaded file %s with size %d", fileName, size)
+	log.Printf("[Downloader] downloaded file %s with size %d", fileName, size)
 
 	return nil
 }
@@ -140,11 +141,13 @@ func main() {
 
 				notification := Notification{Sent: false}
 
+				notification.Name = task.Name
+
 				if err != nil {
-					notification.Status = "error"
+					notification.Status = "failed"
 					notification.Body = err.Error()
 				} else {
-					notification.Status = "ok"
+					notification.Status = "completed"
 					notification.Body = ""
 				}
 
