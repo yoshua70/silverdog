@@ -129,6 +129,7 @@ func main() {
 			} else {
 				log.Printf("[%s] received task `%s` of type `%s` with args `%s`\n", WORKER_NAME, task.Name, task.TaskType, task.Arg)
 
+				// TODO: Check for error and send message to the notification queue.
 				Downloader(task.Arg)
 			}
 		}
