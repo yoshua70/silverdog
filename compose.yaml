@@ -3,3 +3,7 @@ services:
     build: ./backend
     ports:
       - "3333:3333"
+  middleman:
+    build: ./middleman
+    ports:
+      - "8090:8090"
