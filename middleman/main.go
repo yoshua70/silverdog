@@ -24,6 +24,7 @@ type Message struct {
 	Status string `json:"status"`
 	Body   string `json:"body"`
 	Sent   bool   `json:"sent"`
+	Name   string `json:"name"`
 }
 
 var PORT int
@@ -119,7 +120,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				log.Printf("sent message: %s\n", message.Body)
-				messages[i] = Message{Body: message.Body, Status: message.Status, Sent: true}
+				messages[i] = Message{Body: message.Body, Status: message.Status, Sent: true, Name: message.Name}
 			}
 		}
 	}
@@ -134,6 +135,8 @@ func main() {
 
 	log.Printf("argument `port` set to %d\n", PORT)
 	log.Printf("argument `rabbitmq` set to %s\n", RABBITMQ_URL)
+
+	go consummer()
 
 	http.HandleFunc("/ws", handleWebSocket)
 	log.Printf("websoket running on: %d\n", PORT)
