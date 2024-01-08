@@ -24,8 +24,30 @@ services:
       - rabbitmq
     links:
       - rabbitmq
-  worker:
-    container_name: silverdog_worker
+  worker1:
+    container_name: silverdog_worker1
+    build: ./worker
+    command: [ "app", "-rhost", "rabbit1" ]
+    networks:
+        - rabbitmq_go_net
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+  worker2:
+    container_name: silverdog_worker2
+    build: ./worker
+    command: [ "app", "-rhost", "rabbit1" ]
+    networks:
+        - rabbitmq_go_net
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+  worker3:
+    container_name: silverdog_worker3
     build: ./worker
     command: [ "app", "-rhost", "rabbit1" ]
     networks:
