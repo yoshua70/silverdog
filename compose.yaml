@@ -1,9 +1,60 @@
 services:
   backend:
+    container_name: silverdog_backend
     build: ./backend
+    command: [ "app", "-rhost", "rabbit1" ]
     ports:
-      - "3333:3333"
+      - 3333:3333
+    networks:
+        - rabbitmq_go_net
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
   middleman:
+    container_name: silverdog_middleman
     build: ./middleman
+    command: [ "app", "-rhost", "rabbit1" ]
     ports:
-      - "8090:8090"
+      - 8090:8090
+    networks:
+        - rabbitmq_go_net
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+  worker:
+    container_name: silverdog_worker
+    build: ./worker
+    command: [ "app", "-rhost", "rabbit1" ]
+    networks:
+        - rabbitmq_go_net
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    hostname: "rabbit1"
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - rabbitmq_go_net
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+networks:
+  rabbitmq_go_net:
+    external:
+      name: rabbitmq_go_net
+    driver: bridge
