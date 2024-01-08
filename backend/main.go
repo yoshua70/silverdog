@@ -12,11 +12,22 @@ import (
 )
 
 const DEFAULT_PORT int = 3333
-const DEFAULT_RABBITMQ_URL string = "amqp://guest:guest@localhost:5672/"
+const DEFAULT_RABBITMQ_USER string = "guest"
+const DEFAULT_RABBITMQ_PWD string = "guest"
+const DEFAULT_RABBITMQ_HOSTNAME string = "localhost"
+const DEFAULT_RABBITMQ_PORT int = 5672
+
+// "amqp://guest:guest@localhost:5672/"
+var DEFAULT_RABBITMQ_URL string = fmt.Sprintf("amqp://%s:%s@%s:%d", DEFAULT_RABBITMQ_USER, DEFAULT_RABBITMQ_PWD, DEFAULT_RABBITMQ_HOSTNAME, DEFAULT_RABBITMQ_PORT)
+
 const TASK_QUEUE_NAME string = "tasks"
 
 var PORT int
 var RABBITMQ_URL string
+var RABBITMQ_USER string
+var RABBITMQ_PWD string
+var RABBITMQ_HOSTNAME string
+var RABBITMQ_PORT int
 
 type Task struct {
 	Name     string `json:"name"`
@@ -100,12 +111,21 @@ func CheckTaskObject(task Task) error {
 func main() {
 
 	flag.IntVar(&PORT, "port", DEFAULT_PORT, "the listening port for the server")
-	flag.StringVar(&RABBITMQ_URL, "rabbitmq", DEFAULT_RABBITMQ_URL, "the connection url to RabbitMQ")
+	flag.StringVar(&RABBITMQ_USER, "ruser", DEFAULT_RABBITMQ_USER, "the user to connect to RabbitMQ with")
+	flag.StringVar(&RABBITMQ_PWD, "rpwd", DEFAULT_RABBITMQ_PWD, "the password for the RabbitMQ user")
+	flag.StringVar(&RABBITMQ_HOSTNAME, "rhost", DEFAULT_RABBITMQ_HOSTNAME, "the hostname of the RabbitMQ instance")
+	flag.IntVar(&RABBITMQ_PORT, "rport", DEFAULT_RABBITMQ_PORT, "the port of the RabbitMQ instance")
 
 	flag.Parse()
 
 	log.Printf("argument `port` set to %d\n", PORT)
-	log.Printf("argument `rabbitmq` set to %s\n", RABBITMQ_URL)
+	log.Printf("argument `ruser` set to %s\n", RABBITMQ_USER)
+	log.Printf("argument `rpwd` set to %s\n", RABBITMQ_PWD)
+	log.Printf("argument `rhost` set to %s\n", RABBITMQ_HOSTNAME)
+	log.Printf("argument `rport` set to %d\n", RABBITMQ_PORT)
+
+	RABBITMQ_URL = fmt.Sprintf("amqp://%s:%s@%s:%d", RABBITMQ_USER, RABBITMQ_PWD, RABBITMQ_HOSTNAME, RABBITMQ_PORT)
+	log.Printf("rabbitmq connection url is: %s\n", RABBITMQ_URL)
 
 	http.HandleFunc("/", HandleRoot)
 	http.HandleFunc("/task", HandleTask)
