@@ -27,7 +27,7 @@ services:
   worker1:
     container_name: silverdog_worker1
     build: ./worker
-    command: [ "app", "-rhost", "rabbit1" ]
+    command: [ "app", "-rhost", "rabbit1", "-name", "worker1" ]
     networks:
         - rabbitmq_go_net
     restart: on-failure
@@ -38,7 +38,7 @@ services:
   worker2:
     container_name: silverdog_worker2
     build: ./worker
-    command: [ "app", "-rhost", "rabbit1" ]
+    command: [ "app", "-rhost", "rabbit1", "-name", "worker2" ]
     networks:
         - rabbitmq_go_net
     restart: on-failure
@@ -49,7 +49,7 @@ services:
   worker3:
     container_name: silverdog_worker3
     build: ./worker
-    command: [ "app", "-rhost", "rabbit1" ]
+    command: [ "app", "-rhost", "rabbit1", "-name", "worker3" ]
     networks:
         - rabbitmq_go_net
     restart: on-failure
