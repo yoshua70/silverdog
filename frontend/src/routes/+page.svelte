@@ -5,7 +5,7 @@
 
   interface Notification {
     body: string;
-    status: JobStatus;
+    status: string;
     sent: boolean;
     name: string;
   }
@@ -39,7 +39,7 @@
 <div class="flex flex-col gap-2 mt-8">
   <h1 class="text-4xl font-thin">Notifications</h1>
   <div class="flex flex-col my-4 gap-2">
-    {#each messages as message}
+    {#each messages.reverse() as message}
       <JobComponent
         jobTitle={message.name}
         jobStatus={message.status}

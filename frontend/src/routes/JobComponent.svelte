@@ -2,19 +2,19 @@
   import JobStatus from "$lib/jobStatus";
 
   export let jobTitle: string;
-  export let jobStatus: JobStatus;
+  export let jobStatus: string;
   export let jobErrorDetails = "";
   export let jobBody = "";
 
   const getBackgroundColor = () => {
-    switch (jobStatus) {
-      case JobStatus.Pending:
+    switch (jobStatus.toLowerCase()) {
+      case "pending":
         return "bg-gray-300";
-      case JobStatus.InProgress:
+      case "inprogress":
         return "bg-yellow-300";
-      case JobStatus.Completed:
+      case "completed":
         return "bg-green-300";
-      case JobStatus.Failed:
+      case "failed":
         return "bg-red-300";
       default:
         return "bg-gray-300";
