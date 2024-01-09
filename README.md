@@ -6,7 +6,15 @@ A simple task scheduler in Go using RabbitMQ.
 
 ### With docker
 
-Ensure you have docker installed:
+Ensure you have docker installed.
+
+First, create the network:
+
+```sh
+docker create network rabbitmq_go_net
+```
+
+Then, launch the applications:
 
 ```sh
 docker-compose up
