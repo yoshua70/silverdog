@@ -24,6 +24,18 @@ services:
       - rabbitmq
     links:
       - rabbitmq
+  frontend:
+    container_name: silverdog_frontend
+    build: ./frontend
+    ports:
+      - 3000:3000
+    networks:
+      - rabbitmq_go_net
+    restart: on-failure
+    depends_on:
+      - backend
+    links:
+      - backend
   worker1:
     container_name: silverdog_worker1
     build: ./worker
