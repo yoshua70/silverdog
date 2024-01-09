@@ -1,31 +1,49 @@
 <script lang="ts">
-	let url = '';
+	import JobStatus from '$lib/jobStatus';
+	import { onMount } from 'svelte';
+	import JobComponent from './JobComponent.svelte';
 
-	function handleSubmit() {
-		// Handle the form submission here
-		console.log('Submitted URL:', url);
+	interface Notification {
+		body: string;
+		status: JobStatus;
+		sent: boolean;
+		name: string;
 	}
+
+	let messages: Notification[] = [];
+	// let socket;
+
+	const addMessage = (message: string) => {
+		messages = [...messages, JSON.parse(message)];
+	};
+
+	onMount(() => {
+		const socket = new WebSocket('ws://localhost:8090/ws');
+
+		socket.addEventListener('open', function (event) {
+			console.log('websocket connection opened.');
+		});
+
+		socket.addEventListener('message', function (event) {
+			addMessage(event.data);
+			console.log('received message:', event.data);
+		});
+
+		return () => {
+			console.log('websocket connection closed.');
+			socket.close();
+		};
+	});
 </script>
 
-<form on:submit|preventDefault={handleSubmit} class="max-w-md w-full">
-	<div class="mb-4">
-		<label for="url" class="block text-gray-700 mb-2">Enter an URL to download from:</label>
-		<input
-			type="url"
-			id="url"
-			bind:value={url}
-			class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-			placeholder="Enter URL"
-			required
-		/>
-	</div>
+<div class="flex flex-col my-4 gap-2">
+	{#each messages as message}
+		<JobComponent jobTitle={message.name} jobStatus={message.status} jobBody={message.body} />
+	{/each}
+</div>
 
-	<div class="flex items-center justify-between">
-		<button
-			type="submit"
-			class="bg-pink-300 hover:bg-pink-400 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-		>
-			Submit
-		</button>
-	</div>
-</form>
+<style lang="postcss">
+	:global(html) {
+		background-color: theme(colors.gray.100);
+	}
+</style>
